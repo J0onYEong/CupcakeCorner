@@ -14,10 +14,10 @@ struct AddressView: View {
     var body: some View {
         Form {
             Section {
-                TextField("Name", text: $order.name)
-                TextField("Street Address", text: $order.streetAddress)
-                TextField("City", text: $order.city)
-                TextField("Zip", text: $order.zip)
+                TextField("Name", text: $order.publishedData.name)
+                TextField("Street Address", text: $order.publishedData.streetAddress)
+                TextField("City", text: $order.publishedData.city)
+                TextField("Zip", text: $order.publishedData.zip)
             }
             .textInputAutocapitalization(.never)
             .autocorrectionDisabled(true)
@@ -29,7 +29,7 @@ struct AddressView: View {
                     Text("Check out")
                 }
             }
-            .disabled(!order.isValidAdress)
+            .disabled(!order.publishedData.isValidAdress)
         }
         .navigationTitle("Delivery details")
         .navigationBarTitleDisplayMode(.inline)

@@ -16,6 +16,7 @@ extension ShapeStyle where Self == Color {
 struct CheckoutView: View {
     @ObservedObject var order: Order
     
+    @State private var alertTitle = ""
     @State private var confirmationMessage = ""
     @State private var showingConfirmation = false
     
@@ -36,7 +37,7 @@ struct CheckoutView: View {
                 }
                 .frame(height: 233)
                 .clipShape(RoundedRectangle(cornerRadius: 10))
-                Text("Your total is \(order.cost, format: .currency(code: "USD"))")
+                Text("Your total is \(order.publishedData.cost, format: .currency(code: "USD"))")
                     .font(.title)
                 Button("Place Order") {
                     Task {
@@ -44,7 +45,7 @@ struct CheckoutView: View {
                     }
                 }
                 .padding()
-                .alert("Thank you!", isPresented: $showingConfirmation) {
+                .alert(alertTitle, isPresented: $showingConfirmation) {
                     Button("Ok") { }
                 } message: {
                     Text(confirmationMessage)
@@ -72,10 +73,13 @@ struct CheckoutView: View {
             let (data, _) = try await URLSession.shared.upload(for: req, from: encodedData)
             // decoding, 요청이 성공할 경우 ReqRes.in 사이트는 튜플의 data멤버에 POST한 데이터를 그대로 돌려준다.
             let decodedOrder = try JSONDecoder().decode(Order.self, from: data)
-            confirmationMessage = "Your order for \(decodedOrder.quantity)x \(Order.types[decodedOrder.type].lowercased()) cupcakes is on its way!"
+            alertTitle = "Thank you!"
+            confirmationMessage = "Your order for \(decodedOrder.publishedData.quantity)x \(Order.types[decodedOrder.publishedData.type].lowercased()) cupcakes is on its way!"
             showingConfirmation = true
         } catch {
-            print("checkout failed")
+            alertTitle = "Network Error"
+            confirmationMessage = "Internet connecting failed"
+            showingConfirmation = true
         }
     }
 }

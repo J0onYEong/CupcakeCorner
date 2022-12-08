@@ -14,21 +14,21 @@ struct ContentView: View {
         NavigationView {
             Form {
                 Section {
-                    Picker("Cake type", selection: $order.type) {
+                    Picker("Cake type", selection: $order.publishedData.type) {
                         ForEach(Order.types.indices) { index in
                             Text(Order.types[index])
                         }
                     }
-                    Stepper("Number of cakes: \(order.quantity)", value: $order.quantity, in: 3...20)
+                    Stepper("Number of cakes: \(order.publishedData.quantity)", value: $order.publishedData.quantity, in: 3...20)
                 }
 
                 Section {
-                    Toggle("Any special requests?", isOn: $order.specialRequestEnabled.animation())
+                    Toggle("Any special requests?", isOn: $order.publishedData.specialRequestEnabled.animation())
 
-                    if order.specialRequestEnabled {
-                        Toggle("Add extra frosting", isOn: $order.extraFrosting)
+                    if order.publishedData.specialRequestEnabled {
+                        Toggle("Add extra frosting", isOn: $order.publishedData.extraFrosting)
 
-                        Toggle("Add extra sprinkles", isOn: $order.addSprinkles)
+                        Toggle("Add extra sprinkles", isOn: $order.publishedData.addSprinkles)
                     }
                 }
                 
