@@ -15,6 +15,10 @@ extension ShapeStyle where Self == Color {
 
 struct CheckoutView: View {
     @ObservedObject var order: Order
+    
+    @State private var confirmationMessage = ""
+    @State private var showingConfirmation = false
+    
     var body: some View {
         ScrollView {
             VStack {
@@ -34,13 +38,45 @@ struct CheckoutView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 10))
                 Text("Your total is \(order.cost, format: .currency(code: "USD"))")
                     .font(.title)
-                Button("Place Order", action: { })
-                    .padding()
-                
+                Button("Place Order") {
+                    Task {
+                        await placeOrder()
+                    }
+                }
+                .padding()
+                .alert("Thank you!", isPresented: $showingConfirmation) {
+                    Button("Ok") { }
+                } message: {
+                    Text(confirmationMessage)
+                }
             }
         }
         .navigationTitle("Check out")
         .navigationBarTitleDisplayMode(.inline)
+    }
+    
+    func placeOrder() async {
+        // encoding
+        guard let encodedData = try? JSONEncoder().encode(order) else {
+            print("encoding Error")
+            return;
+        }
+        // request configuration
+        let urlStr = "https://reqres.in/api/cupcakes"
+        let url = URL(string: urlStr)!
+        var req = URLRequest(url: url)
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.httpMethod = "POST"
+        
+        do {
+            let (data, _) = try await URLSession.shared.upload(for: req, from: encodedData)
+            // decoding, 요청이 성공할 경우 ReqRes.in 사이트는 튜플의 data멤버에 POST한 데이터를 그대로 돌려준다.
+            let decodedOrder = try JSONDecoder().decode(Order.self, from: data)
+            confirmationMessage = "Your order for \(decodedOrder.quantity)x \(Order.types[decodedOrder.type].lowercased()) cupcakes is on its way!"
+            showingConfirmation = true
+        } catch {
+            print("checkout failed")
+        }
     }
 }
 
