@@ -27,12 +27,14 @@ struct CheckoutView: View {
                     image
                         .resizable()
                         .scaledToFit()
+                        .accessibilityHidden(true)
                 } placeholder: {
                     ZStack {
                         Color.loadingGray
                         Text("Image loading...")
                             .foregroundColor(.gray)
                             .font(.headline)
+                            .accessibilityHidden(true)
                     }
                 }
                 .frame(height: 233)
